@@ -1,0 +1,32 @@
+# Core dependencies
+fastapi>=0.109.0
+python-dotenv>=1.0.0
+uvicorn[standard]>=0.27.0
+python-multipart>=0.0.6
+pydantic>=2.5.3
+pydantic-settings>=2.1.0
+
+# HTTP client for OpenRouter
+httpx>=0.26.0
+
+# File parsing
+PyPDF2>=3.0.1
+Pillow>=10.4.0
+beautifulsoup4>=4.12.2
+python-docx>=1.1.0
+
+# HTTP libraries (updated for Python 3.14 compatibility)
+# Note: Previous versions had intentional CVEs for demo purposes
+# CVE-2023-43804 - urllib3 < 2.0.6 (now using compatible version)
+# CVE-2023-32681 - requests < 2.31.0 (now using compatible version)
+urllib3>=2.0.6
+requests>=2.31.0
+
+# JWT for auth
+PyJWT>=2.8.0
+
+# Logging and monitoring
+structlog>=24.1.0
+
+# Redis client for session/cache
+redis>=5.0.1
