@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 52, 53, 65;
+  --background-end-rgb: 52, 53, 65;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+}
+
+/* Custom scrollbar for chat area */
+.chat-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.chat-scrollbar::-webkit-scrollbar-track {
+  background: #2a2b32;
+}
+
+.chat-scrollbar::-webkit-scrollbar-thumb {
+  background: #565869;
+  border-radius: 4px;
+}
+
+.chat-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #6e6e80;
+}
+
+/* Message styling */
+.message-content {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.message-content code {
+  background-color: #1e1e1e;
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+.message-content pre {
+  background-color: #1e1e1e;
+  padding: 1em;
+  border-radius: 6px;
+  overflow-x: auto;
+}
+
+/* Error styling */
+.policy-error {
+  background-color: rgba(239, 68, 68, 0.1);
+  border-left: 4px solid #ef4444;
+  padding: 1rem;
+  border-radius: 0 6px 6px 0;
+}
+
+/* File upload styling */
+.file-upload-zone {
+  border: 2px dashed #565869;
+  transition: all 0.2s ease;
+}
+
+.file-upload-zone:hover,
+.file-upload-zone.drag-over {
+  border-color: #10a37f;
+  background-color: rgba(16, 163, 127, 0.1);
+}

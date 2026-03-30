@@ -1,0 +1,86 @@
+# Policy Exceptions Configuration
+#
+# Defines role-based exceptions to security policies.
+# Use for legitimate applications that handle sensitive data.
+#
+# SECURITY NOTES (for Unifai demo):
+# - Demonstrates policy flexibility for legitimate use cases
+# - Addresses Wipro concern about blocking legitimate PII applications
+
+# PII Policy Exceptions
+pii_policy:
+  exceptions:
+    - role: admin
+      reason: "Administrative data management"
+      allowed_operations:
+        - read
+        - write
+        - export
+      audit_required: true
+      max_records: 1000
+
+    - role: compliance_officer
+      reason: "Audit and compliance requirements"
+      allowed_operations:
+        - read
+      audit_required: true
+
+    - role: data_entry
+      reason: "Data entry application"
+      allowed_operations:
+        - read
+        - write
+      audit_required: true
+      pii_types_allowed:
+        - email
+        - phone
+      pii_types_blocked:
+        - ssn
+        - credit_card
+
+    - role: hr_admin
+      reason: "HR management system"
+      allowed_operations:
+        - read
+        - write
+      audit_required: true
+      conditions:
+        - employee_data_only: true
+        - retention_days: 90
+
+# Agent Authentication Exceptions
+agent_auth_policy:
+  exceptions:
+    - agent: health_check
+      reason: "System health monitoring"
+      bypass_auth: true
+      allowed_endpoints:
+        - /health
+        - /metrics
+
+    - agent: internal_scheduler
+      reason: "Scheduled task execution"
+      bypass_auth: false
+      token_type: service_account
+
+# Prompt Injection Exceptions
+prompt_injection_policy:
+  exceptions:
+    - context: code_review
+      reason: "Legitimate code analysis may contain suspicious patterns"
+      reduced_sensitivity: true
+      log_only: true
+
+    - context: security_training
+      reason: "Security training content includes attack examples"
+      allowed_patterns:
+        - prompt_injection_example
+        - attack_demonstration
+      audit_required: true
+
+# Default behavior when no exception applies
+defaults:
+  action: block
+  log_violation: true
+  notify_admin: true
+  include_details: false  # Don't include sensitive data in alerts

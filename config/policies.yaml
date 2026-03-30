@@ -1,0 +1,90 @@
+# PolicyProbe Policy Configuration
+#
+# This file defines the security policies for the application.
+#
+# SECURITY NOTES (for Unifai demo):
+# - Policies are defined but NOT ENFORCED in vulnerable version
+# - After Unifai remediation, these policies will be active
+
+policies:
+  pii_detection:
+    enabled: false  # VULNERABILITY: Disabled by default
+    description: "Detect and block PII in uploaded files"
+    actions:
+      - scan_uploads
+      - block_if_found
+      - log_violation
+    severity: high
+
+  prompt_injection:
+    enabled: false  # VULNERABILITY: Disabled by default
+    description: "Detect hidden prompts and malicious content"
+    actions:
+      - scan_content
+      - detect_hidden_text
+      - block_threats
+    severity: critical
+
+  agent_authentication:
+    enabled: false  # VULNERABILITY: Disabled by default
+    description: "Require authentication for inter-agent communication"
+    actions:
+      - validate_token
+      - check_privileges
+      - audit_access
+    severity: high
+
+  response_validation:
+    enabled: false  # VULNERABILITY: Disabled by default
+    description: "Validate LLM responses for policy compliance"
+    actions:
+      - check_pii_leakage
+      - check_bias
+      - filter_harmful
+    severity: medium
+
+# Privilege levels for agent access control
+privilege_levels:
+  low:
+    level: 1
+    allowed_agents:
+      - tech_support
+    allowed_resources:
+      - public_data
+      - user_queries
+
+  medium:
+    level: 2
+    allowed_agents:
+      - tech_support
+      - file_processor
+    allowed_resources:
+      - public_data
+      - user_queries
+      - file_processing
+
+  high:
+    level: 3
+    allowed_agents:
+      - tech_support
+      - file_processor
+      - finance
+    allowed_resources:
+      - public_data
+      - user_queries
+      - file_processing
+      - financial_data
+
+  admin:
+    level: 4
+    allowed_agents:
+      - all
+    allowed_resources:
+      - all
+
+# Logging configuration
+logging:
+  audit_enabled: false  # VULNERABILITY: Audit disabled
+  log_level: INFO
+  include_content: true  # VULNERABILITY: Content in logs
+  mask_pii: false  # VULNERABILITY: PII not masked

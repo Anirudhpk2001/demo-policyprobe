@@ -1,0 +1,117 @@
+# PII Detection Patterns Configuration
+#
+# Defines regex patterns for detecting personally identifiable information.
+# Organized by region and industry for customization.
+#
+# SECURITY NOTES (for Unifai demo):
+# - Patterns are defined but NOT USED in vulnerable version
+# - After Unifai remediation, these patterns will be active
+
+# Global patterns (apply everywhere)
+global:
+  # US Social Security Number
+  ssn:
+    pattern: '\b\d{3}-\d{2}-\d{4}\b'
+    label: "Social Security Number"
+    confidence: 0.95
+    severity: critical
+
+  ssn_no_dash:
+    pattern: '\b\d{9}\b'
+    label: "Social Security Number (no dashes)"
+    confidence: 0.7  # Lower confidence due to false positives
+    severity: critical
+    context_required: true  # Needs surrounding context
+
+  # Credit Card Numbers
+  credit_card:
+    pattern: '\b(?:\d{4}[-\s]?){3}\d{4}\b'
+    label: "Credit Card Number"
+    confidence: 0.9
+    severity: critical
+
+  credit_card_amex:
+    pattern: '\b3[47]\d{2}[-\s]?\d{6}[-\s]?\d{5}\b'
+    label: "American Express Card"
+    confidence: 0.95
+    severity: critical
+
+  # Phone Numbers
+  phone_us:
+    pattern: '\b(?:\+1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b'
+    label: "US Phone Number"
+    confidence: 0.85
+    severity: high
+
+  # Email Addresses
+  email:
+    pattern: '\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+    label: "Email Address"
+    confidence: 0.95
+    severity: medium
+
+# Regional patterns
+regions:
+  us:
+    # US-specific patterns already in global
+    drivers_license:
+      pattern: '\b[A-Z]\d{7,8}\b'
+      label: "US Drivers License"
+      confidence: 0.6
+      severity: high
+      context_required: true
+
+  eu:
+    # EU national ID patterns
+    iban:
+      pattern: '\b[A-Z]{2}\d{2}[A-Z0-9]{4}\d{7}([A-Z0-9]?){0,16}\b'
+      label: "IBAN"
+      confidence: 0.9
+      severity: high
+
+# Industry-specific patterns
+industries:
+  healthcare:
+    mrn:
+      pattern: '\bMRN[:\s]?\d{6,10}\b'
+      label: "Medical Record Number"
+      confidence: 0.9
+      severity: critical
+
+    npi:
+      pattern: '\b\d{10}\b'
+      label: "National Provider Identifier"
+      confidence: 0.5
+      severity: high
+      context_required: true
+
+  finance:
+    account_number:
+      pattern: '\b\d{8,12}\b'
+      label: "Bank Account Number"
+      confidence: 0.4
+      severity: high
+      context_required: true
+
+    routing_number:
+      pattern: '\b\d{9}\b'
+      label: "Bank Routing Number"
+      confidence: 0.5
+      severity: high
+      context_required: true
+
+# Detection settings
+settings:
+  # Minimum confidence to report a match
+  min_confidence: 0.7
+
+  # Whether to check surrounding context
+  use_context: true
+  context_window: 50  # Characters before/after to analyze
+
+  # Nested object scanning depth
+  max_depth: 10
+
+  # Performance limits
+  max_content_size: 10485760  # 10MB
+  timeout_seconds: 30
