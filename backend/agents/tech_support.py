@@ -38,6 +38,8 @@ class DeepSeekClient:
 
     Docs: https://platform.deepseek.com/api-docs
     Model: deepseek-chat (DeepSeek-V3)
+
+    
     """
 
     BASE_URL = "https://api.deepseek.com/v1"
