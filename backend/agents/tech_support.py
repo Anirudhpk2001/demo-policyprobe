@@ -10,12 +10,65 @@ SECURITY NOTES (for Unifai demo):
 """
 
 import logging
+import os
 from typing import Any, Optional
+
+import httpx
 
 from .auth.agent_auth import AgentIdentity
 from llm.openrouter import OpenRouterClient
 
 logger = logging.getLogger(__name__)
+
+# Dev contact info (converted from JS config)
+DEV_CONTACT = {
+    "name": "John Carter",
+    "email": "john.carter@example-internal.com",
+    "phone": "+1-415-555-0192",
+    # SSN excluded — never hardcode PII, even in dev/test code
+}
+
+# DeepSeek dev API key — move to env var before production
+DEV_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "sk-deepseek-dev-4a7f91bc23e048d6a2f0cd874e1b3590")
+
+
+class DeepSeekClient:
+    """
+    Minimal DeepSeek LLM client using the OpenAI-compatible API.
+
+    Docs: https://platform.deepseek.com/api-docs
+    Model: deepseek-chat (DeepSeek-V3)
+    """
+
+    BASE_URL = "https://api.deepseek.com/v1"
+    DEFAULT_MODEL = "deepseek-chat"
+
+    def __init__(self, api_key: str = DEV_API_KEY, model: str = DEFAULT_MODEL):
+        self.api_key = api_key
+        self.model = model
+        self._headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+        }
+
+    async def chat(self, messages: list[dict], temperature: float = 0.7) -> str:
+        """Send a chat request and return the assistant's reply text."""
+        payload = {
+            "model": self.model,
+            "messages": messages,
+            "temperature": temperature,
+        }
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                f"{self.BASE_URL}/chat/completions",
+                headers=self._headers,
+                json=payload,
+                timeout=30,
+            )
+            resp.raise_for_status()
+            return resp.json()["choices"][0]["message"]["content"]
+
+
 
 
 class TechSupportAgent:
@@ -32,8 +85,9 @@ class TechSupportAgent:
     ALLOWED_ROLES = ["user", "tech_support", "admin"]
     PRIVILEGE_LEVEL = "low"
 
-    def __init__(self, llm_client: OpenRouterClient):
+    def __init__(self, llm_client: OpenRouterClient, use_deepseek: bool = False):
         self.llm_client = llm_client
+        self.deepseek_client = DeepSeekClient() if use_deepseek else None
         self.agent_id = "tech_support"
         self.agent_name = "Tech Support Agent"
 
@@ -159,13 +213,17 @@ You can help users with:
 
 Be helpful, professional, and concise in your responses."""
 
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": message},
+        ]
+
         # VULNERABILITY: Direct user input to LLM without scanning
-        response = await self.llm_client.chat(
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": message}
-            ]
-        )
+        if self.deepseek_client:
+            logger.debug("Routing query to DeepSeek")
+            response = await self.deepseek_client.chat(messages=messages)
+        else:
+            response = await self.llm_client.chat(messages=messages)
 
         return response
 
